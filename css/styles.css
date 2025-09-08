@@ -1,1 +1,6 @@
+:root {
+  --radius-xl: 1rem;
+}
+img { max-width: 100%; height: auto; }
+button:focus-visible { outline: 3px solid #f3ba00; outline-offset: 2px; }
 
