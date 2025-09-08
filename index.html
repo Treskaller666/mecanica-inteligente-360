@@ -1,1 +1,138 @@
-index.html
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mecánica Inteligente 360</title>
+
+  <!-- Tailwind por CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7db',
+              500: '#f3ba00',
+              700: '#e4002b'
+            }
+          },
+          borderRadius: {
+            '2xl': '1rem'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Alpine.js para interactividad ligera -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Supabase JS (lo usaremos en el Ítem 2) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-amber-50 text-stone-800">
+  <div x-data="{ view: 'agenda' }" class="min-h-dvh flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-brand-500 text-white px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg class="w-8 h-8 hidden sm:block" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M3 7h18v2H3V7zm2 4h14l-1.5 6h-11L5 11zm4 7h6v2H9v-2z"/>
+        </svg>
+        <h1 class="text-lg font-semibold leading-none">Mecánica Inteligente 360</h1>
+      </div>
+      <span class="text-sm opacity-90">v0.1 (UI)</span>
+    </header>
+
+    <!-- Contenido -->
+    <main class="flex-1 p-4 space-y-4">
+
+      <!-- Agenda -->
+      <section x-show="view === 'agenda'" x-transition class="space-y-3" aria-label="Agendamiento">
+        <h2 class="text-xl font-semibold">Agendamiento</h2>
+        <div class="grid gap-3">
+          <div class="p-4 bg-white rounded-2xl shadow">
+            <p class="text-sm text-stone-600">Reserva en 2 pasos con QR Check-in.</p>
+            <button class="mt-3 px-4 py-2 rounded-2xl bg-brand-700 text-white">Nueva reserva</button>
+          </div>
+          <div class="p-4 bg-white rounded-2xl shadow">
+            <p class="font-medium">10:00 — Toyota Yaris (Mantención 10k)</p>
+            <p class="text-sm text-stone-600">Cliente: Ana Pérez</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recepción -->
+      <section x-show="view === 'recepcion'" x-transition class="space-y-3" aria-label="Recepción">
+        <h2 class="text-xl font-semibold">Recepción</h2>
+        <div class="p-4 bg-white rounded-2xl shadow">
+          <p class="text-sm text-stone-600">Checklist con fotos/video y firma.</p>
+          <button class="mt-3 px-4 py-2 rounded-2xl bg-stone-900 text-white">Iniciar recepción</button>
+        </div>
+      </section>
+
+      <!-- Diagnóstico -->
+      <section x-show="view === 'diagnostico'" x-transition class="space-y-3" aria-label="Diagnóstico">
+        <h2 class="text-xl font-semibold">Diagnóstico</h2>
+        <div class="p-4 bg-white rounded-2xl shadow">
+          <p class="text-sm text-stone-600">Flujo guiado por componente/síntoma.</p>
+        </div>
+      </section>
+
+      <!-- Cotización -->
+      <section x-show="view === 'cotizacion'" x-transition class="space-y-3" aria-label="Cotización">
+        <h2 class="text-xl font-semibold">Cotización</h2>
+        <div class="p-4 bg-white rounded-2xl shadow">
+          <p class="text-sm text-stone-600">Estimación costo/tiempo y aprobación.</p>
+        </div>
+      </section>
+
+      <!-- Reparación -->
+      <section x-show="view === 'reparacion'" x-transition class="space-y-3" aria-label="Reparación">
+        <h2 class="text-xl font-semibold">Reparación</h2>
+        <div class="p-4 bg-white rounded-2xl shadow">
+          <p class="text-sm text-stone-600">Tareas en progreso, fotos, observaciones.</p>
+        </div>
+      </section>
+
+      <!-- Inventario -->
+      <section x-show="view === 'inventario'" x-transition class="space-y-3" aria-label="Inventario">
+        <h2 class="text-xl font-semibold">Inventario</h2>
+        <div class="p-4 bg-white rounded-2xl shadow">
+          <p class="text-sm text-stone-600">Alertas de stock mínimo y compatibilidad.</p>
+        </div>
+      </section>
+
+      <!-- Postventa -->
+      <section x-show="view === 'postventa'" x-transition class="space-y-3" aria-label="Postventa">
+        <h2 class="text-xl font-semibold">Postventa</h2>
+        <div class="p-4 bg-white rounded-2xl shadow">
+          <p class="text-sm text-stone-600">Recordatorios por km/fecha y bitácora.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Navegación inferior (móvil) -->
+    <nav class="sticky bottom-0 bg-white border-t text-sm">
+      <ul class="grid grid-cols-3 sm:grid-cols-7">
+        <li><button class="w-full py-3" @click="view='agenda'">Agenda</button></li>
+        <li><button class="w-full py-3" @click="view='recepcion'">Recepción</button></li>
+        <li><button class="w-full py-3" @click="view='diagnostico'">Diagnóstico</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='cotizacion'">Cotización</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='reparacion'">Reparación</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='inventario'">Inventario</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='postventa'">Postventa</button></li>
+      </ul>
+    </nav>
+  </div>
+
+  <script src="js/app.js" defer></script>
+  <script src="js/supabaseClient.js" defer></script>
+</body>
+</html>
+
