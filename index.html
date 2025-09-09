@@ -21,14 +21,16 @@
   <!-- Alpine.js para interactividad ligera -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- Supabase SDK (la conexión real está en js/supabaseClient.js) -->
+  <!-- SDK de Supabase (la conexión real está en js/supabaseClient.js) -->
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Tus estilos opcionales -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-amber-50 text-stone-800">
   <div x-data="{ view: 'agenda' }" class="min-h-dvh flex flex-col">
 
+    <!-- Header -->
     <header class="bg-brand-500 text-white px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <svg class="w-8 h-8 hidden sm:block" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -39,11 +41,16 @@
       <span class="text-sm opacity-90">v0.1 (UI)</span>
     </header>
 
+    <!-- Contenido -->
     <main class="flex-1 p-4 space-y-4">
+      <!-- Agendamiento -->
       <section x-show="view === 'agenda'" x-transition class="space-y-4" aria-label="Agendamiento">
         <h2 class="text-xl font-semibold">Agendamiento</h2>
+
+        <!-- Indicador de estado (conexión/diagnóstico) -->
         <p id="estado-app" class="text-sm text-stone-600">Inicializando…</p>
 
+        <!-- Formulario de nueva cita -->
         <form id="form-cita" class="p-4 bg-white rounded-2xl shadow grid gap-3" onsubmit="return false;">
           <p class="text-sm text-stone-600">Crear cita rápida (cliente + vehículo + cita)</p>
 
@@ -92,10 +99,32 @@
           <p id="msg-cita" class="text-sm"></p>
         </form>
 
+        <!-- Lista de citas -->
         <div id="lista-citas" class="grid gap-3"></div>
+      </section>
+
+      <!-- (Secciones futuras) -->
+      <section x-show="view === 'recepcion'" x-transition class="space-y-3" aria-label="Recepción" hidden>
+        <h2 class="text-xl font-semibold">Recepción</h2>
+      </section>
+      <section x-show="view === 'diagnostico'" x-transition class="space-y-3" aria-label="Diagnóstico" hidden>
+        <h2 class="text-xl font-semibold">Diagnóstico</h2>
+      </section>
+      <section x-show="view === 'cotizacion'" x-transition class="space-y-3" aria-label="Cotización" hidden>
+        <h2 class="text-xl font-semibold">Cotización</h2>
+      </section>
+      <section x-show="view === 'reparacion'" x-transition class="space-y-3" aria-label="Reparación" hidden>
+        <h2 class="text-xl font-semibold">Reparación</h2>
+      </section>
+      <section x-show="view === 'inventario'" x-transition class="space-y-3" aria-label="Inventario" hidden>
+        <h2 class="text-xl font-semibold">Inventario</h2>
+      </section>
+      <section x-show="view === 'postventa'" x-transition class="space-y-3" aria-label="Postventa" hidden>
+        <h2 class="text-xl font-semibold">Postventa</h2>
       </section>
     </main>
 
+    <!-- Navegación inferior -->
     <nav class="sticky bottom-0 bg-white border-t text-sm">
       <ul class="grid grid-cols-3 sm:grid-cols-7">
         <li><button class="w-full py-3" @click="view='agenda'">Agenda</button></li>
@@ -109,10 +138,9 @@
     </nav>
   </div>
 
-  <!-- ORDEN CORRECTO: primero Supabase, luego app -->
-  <script src="js/supabaseClient.js?v=2013" defer></script>
-<script src="js/app.js?v=2013" defer></script>
+  <!-- ORDEN CORRECTO: primero Supabase, luego app (con cache-busting) -->
+  <script src="js/supabaseClient.js?v=4002" defer></script>
+  <script src="js/app.js?v=4002" defer></script>
 </body>
 </html>
-
 
