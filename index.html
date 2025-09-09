@@ -104,14 +104,14 @@
       </section>
 
       <!-- (Secciones futuras) -->
-      <section x-show="view === 'recepcion'" x-transition class="space-y-3" aria-label="Recepción">
+     <section x-show="view === 'recepcion'" x-transition class="space-y-3" aria-label="Recepción" hidden>
   <h2 class="text-xl font-semibold">Recepción</h2>
 
   <form id="form-recepcion" class="p-4 bg-white rounded-2xl shadow grid gap-3" onsubmit="return false;">
     <div>
       <label class="block text-sm mb-1">ID de la cita</label>
       <input id="r-cita-id" type="number" class="w-full px-3 py-2 rounded-xl border" placeholder="Ej: 1">
-      <p class="text-xs text-stone-500 mt-1">Tip: abajo en “Agenda” verás el ID de cada cita.</p>
+      <p class="text-xs text-stone-500 mt-1">Tip: el ID aparece en la Agenda (#123).</p>
     </div>
 
     <div>
@@ -127,6 +127,7 @@
     <p id="msg-recepcion" class="text-sm"></p>
   </form>
 </section>
+
 
       <section x-show="view === 'diagnostico'" x-transition class="space-y-3" aria-label="Diagnóstico" hidden>
         <h2 class="text-xl font-semibold">Diagnóstico</h2>
