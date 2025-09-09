@@ -1,4 +1,58 @@
 /***** app.js — Mecánica Inteligente 360 *****/
+// === DIAGNÓSTICO VISUAL (muestra resultados en la página) ===
+async function diagMostrar(msg, color='stone') {
+  const p = document.getElementById('estado-app');
+  if (!p) return;
+  const map = { stone:'text-stone-700', red:'text-red-700', green:'text-green-700', blue:'text-blue-700' };
+  p.className = `text-sm ${map[color]||map.stone}`;
+  p.textContent = msg;
+}
+
+async function diagnosticoConexion() {
+  try {
+    const URL = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : (window._supabase?.url || ''));
+    if (!URL) {
+      await diagMostrar('❌ No hay SUPABASE_URL / _supabase.url. Revisa supabaseClient.js y el orden de scripts.', 'red');
+      return;
+    }
+
+    // 1) Ping simple a Auth (no requiere headers). Si esto falla, es red/DNS/CORS del navegador.
+    await diagMostrar('🔎 Test 1/3: ping a /auth/v1/health…', 'blue');
+    const r1 = await fetch(`${URL}/auth/v1/health`);
+    const t1 = await r1.text();
+    if (!r1.ok) { await diagMostrar(`❌ Test 1/3 falló: ${r1.status} ${t1.slice(0,60)}`, 'red'); return; }
+
+    // 2) Llamada REST a /rest/v1/citas (con headers). Prueba CORS + credenciales.
+    await diagMostrar('🔎 Test 2/3: REST /rest/v1/citas?select=id…', 'blue');
+    const key = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : window._supabase?.supabaseKey);
+    const r2 = await fetch(`${URL}/rest/v1/citas?select=id&limit=1`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` }
+    });
+    const t2 = await r2.text();
+    if (!r2.ok) {
+      await diagMostrar(`❌ Test 2/3 falló: ${r2.status} ${t2.slice(0,120)}`, 'red');
+      return;
+    }
+
+    // 3) Cliente JS oficial (supabase-js) – select real usando la librería.
+    await diagMostrar('🔎 Test 3/3: cliente supabase-js select citas…', 'blue');
+    if (!window._supabase) {
+      await diagMostrar('❌ Test 3/3: _supabase no está inicializado (revisa orden de scripts).', 'red');
+      return;
+    }
+    const { data, error } = await window._supabase.from('citas').select('id').limit(1);
+    if (error) {
+      await diagMostrar(`❌ Test 3/3 error cliente: ${error.message}`, 'red');
+      return;
+    }
+
+    await diagMostrar('✅ Conexión OK: tests 1/3, 2/3 y 3/3 pasaron. Si aún falla crear/listar, es lógica del form.', 'green');
+  } catch (e) {
+    await diagMostrar(`❌ Excepción de red: ${e}`, 'red');
+  }
+}
+// Lanza diagnóstico al cargar
+window.addEventListener('DOMContentLoaded', diagnosticoConexion);
 
 /* Espera a que supabaseClient.js inicialice window._supabase */
 let db = null;
