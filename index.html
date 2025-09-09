@@ -1,6 +1,116 @@
 <!doctype html>
 <html lang="es">
-  <meta charset="utf-8">
-  <title>Prueba</title>
-  <h1 style="padding:2rem;font-family:sans-serif">✅ GitHub Pages está cargando bien</h1>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mecánica Inteligente 360</title>
+
+  <!-- Tailwind por CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand: { 50:'#fff7db', 500:'#f3ba00', 700:'#e4002b' } },
+          borderRadius: { '2xl': '1rem' }
+        }
+      }
+    }
+  </script>
+
+  <!-- Alpine.js para interactividad ligera -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Supabase SDK (la conexión real está en js/supabaseClient.js) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-amber-50 text-stone-800">
+  <div x-data="{ view: 'agenda' }" class="min-h-dvh flex flex-col">
+
+    <header class="bg-brand-500 text-white px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg class="w-8 h-8 hidden sm:block" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M3 7h18v2H3V7zm2 4h14l-1.5 6h-11L5 11zm4 7h6v2H9v-2z"/>
+        </svg>
+        <h1 class="text-lg font-semibold leading-none">Mecánica Inteligente 360</h1>
+      </div>
+      <span class="text-sm opacity-90">v0.1 (UI)</span>
+    </header>
+
+    <main class="flex-1 p-4 space-y-4">
+      <section x-show="view === 'agenda'" x-transition class="space-y-4" aria-label="Agendamiento">
+        <h2 class="text-xl font-semibold">Agendamiento</h2>
+        <p id="estado-app" class="text-sm text-stone-600">Inicializando…</p>
+
+        <form id="form-cita" class="p-4 bg-white rounded-2xl shadow grid gap-3" onsubmit="return false;">
+          <p class="text-sm text-stone-600">Crear cita rápida (cliente + vehículo + cita)</p>
+
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm mb-1">Nombre del cliente</label>
+              <input id="f-nombre" type="text" class="w-full px-3 py-2 rounded-xl border" placeholder="Ana Pérez" required>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">Teléfono (opcional)</label>
+              <input id="f-telefono" type="text" class="w-full px-3 py-2 rounded-xl border" placeholder="+56 9 1111 2222">
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-sm mb-1">Marca</label>
+              <input id="f-marca" type="text" class="w-full px-3 py-2 rounded-xl border" placeholder="Toyota" required>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">Modelo</label>
+              <input id="f-modelo" type="text" class="w-full px-3 py-2 rounded-xl border" placeholder="Yaris" required>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">Año</label>
+              <input id="f-anio" type="number" min="1950" max="2100" class="w-full px-3 py-2 rounded-xl border" placeholder="2019" required>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm mb-1">Fecha y hora</label>
+              <input id="f-fecha" type="datetime-local" class="w-full px-3 py-2 rounded-xl border" required>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">Servicio</label>
+              <input id="f-servicio" type="text" class="w-full px-3 py-2 rounded-xl border" placeholder="Mantención 10k" required>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button id="btn-crear" class="px-4 py-2 rounded-2xl bg-brand-700 text-white">Crear cita</button>
+            <button type="reset" class="px-4 py-2 rounded-2xl border">Limpiar</button>
+          </div>
+
+          <p id="msg-cita" class="text-sm"></p>
+        </form>
+
+        <div id="lista-citas" class="grid gap-3"></div>
+      </section>
+    </main>
+
+    <nav class="sticky bottom-0 bg-white border-t text-sm">
+      <ul class="grid grid-cols-3 sm:grid-cols-7">
+        <li><button class="w-full py-3" @click="view='agenda'">Agenda</button></li>
+        <li><button class="w-full py-3" @click="view='recepcion'">Recepción</button></li>
+        <li><button class="w-full py-3" @click="view='diagnostico'">Diagnóstico</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='cotizacion'">Cotización</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='reparacion'">Reparación</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='inventario'">Inventario</button></li>
+        <li class="hidden sm:block"><button class="w-full py-3" @click="view='postventa'">Postventa</button></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ORDEN CORRECTO: primero Supabase, luego app -->
+  <script src="js/supabaseClient.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
 </html>
