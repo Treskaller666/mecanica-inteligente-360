@@ -15,9 +15,14 @@ async function diagnostico() {
     if (!window.SUPABASE_URL) { await diag('❌ No hay SUPABASE_URL. Revisa supabaseClient.js', 'red'); return; }
 
     // Test 1: endpoint público (sin headers)
-    await diag('🔎 Test 1/3: /auth/v1/health…', 'blue');
-    const r1 = await fetch(`${window.SUPABASE_URL}/auth/v1/health`);
-    if (!r1.ok) { await diag(`❌ Test 1/3: ${r1.status}`, 'red'); return; }
+   // Test 1: endpoint público (algunos proyectos devuelven 401, lo ignoramos)
+await diag('🔎 Test 1/3: /auth/v1/health…', 'blue');
+const r1 = await fetch(`${window.SUPABASE_URL}/auth/v1/health`);
+if (!r1.ok && r1.status !== 401) { 
+  await diag(`❌ Test 1/3: ${r1.status}`, 'red'); 
+  return; 
+}
+
 
     // Test 2: REST (con headers) — valida anon key y CORS
     await diag('🔎 Test 2/3: /rest/v1/citas?select=id…', 'blue');
