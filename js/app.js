@@ -204,3 +204,4 @@ window.addEventListener('DOMContentLoaded', async () => {
   const btnRecepcion = document.getElementById('btn-recepcion');
   if (btnRecepcion) btnRecepcion.addEventListener('click', marcarRecepcion);
 });
+ 
