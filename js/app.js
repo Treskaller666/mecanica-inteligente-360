@@ -1,13 +1,27 @@
-const db = window._supabase;
+/***** app.js — Mecánica Inteligente 360 *****/
 
-// Utilidades de formato
-const fmtHora = (ts) => new Date(ts).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-const fmtFecha = (ts) => new Date(ts).toLocaleDateString('es-CL');
+/* Espera a que supabaseClient.js inicialice window._supabase */
+let db = null;
+async function waitForSupabase(maxTries = 20, delayMs = 150) {
+  for (let i = 0; i < maxTries; i++) {
+    if (window._supabase) {
+      db = window._supabase;
+      return true;
+    }
+    await new Promise(r => setTimeout(r, delayMs));
+  }
+  return false;
+}
 
-// Render de la lista de citas
+/* Utilidades de formato */
+const fmtHora  = ts => new Date(ts).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+const fmtFecha = ts => new Date(ts).toLocaleDateString('es-CL');
+
+/* Render de la lista de citas */
 async function listarCitas() {
   const cont = document.getElementById('lista-citas');
   if (!cont) return;
+
   cont.innerHTML = '<div class="p-4 bg-white rounded-2xl shadow text-sm text-stone-600">Cargando citas…</div>';
 
   const { data, error } = await db
@@ -23,7 +37,6 @@ async function listarCitas() {
     .limit(50);
 
   if (error) {
-    console.error(error);
     cont.innerHTML = `<div class="p-4 bg-white rounded-2xl shadow text-red-700">Error al cargar: ${error.message}</div>`;
     return;
   }
@@ -34,8 +47,8 @@ async function listarCitas() {
   }
 
   cont.innerHTML = data.map(c => {
-    const marca = c.vehiculos?.marca ?? '—';
-    const modelo = c.vehiculos?.modelo ?? '';
+    const marca   = c.vehiculos?.marca ?? '—';
+    const modelo  = c.vehiculos?.modelo ?? '';
     const cliente = c.vehiculos?.clientes?.nombre ?? 'Cliente';
     return `
       <div class="p-4 bg-white rounded-2xl shadow">
@@ -48,7 +61,7 @@ async function listarCitas() {
   }).join('');
 }
 
-// Crear cita a partir del formulario
+/* Crear cita a partir del formulario (cliente → vehículo → cita) */
 async function crearCitaDesdeForm() {
   const msg = document.getElementById('msg-cita');
   const btn = document.getElementById('btn-crear');
@@ -114,18 +127,27 @@ async function crearCitaDesdeForm() {
   document.getElementById('form-cita').reset();
   btn.disabled = false; btn.textContent = 'Crear cita';
 
-  // Refrescar lista
+  // Refrescar listado
   listarCitas();
 }
 
-// Wiring
-window.addEventListener('DOMContentLoaded', () => {
+/* Inicio: espera Supabase, luego arma eventos y carga lista */
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await waitForSupabase();
+  if (!ok) {
+    // Mensaje visible si algo falló con la carga del cliente
+    const cont = document.getElementById('lista-citas');
+    if (cont) cont.innerHTML = `<div class="p-4 bg-white rounded-2xl shadow text-red-700">
+      Supabase no está inicializado. Revisa que en index.html se cargue
+      primero <code>js/supabaseClient.js</code> y luego <code>js/app.js</code>.
+    </div>`;
+    return;
+  }
+
   // Listado inicial
-  listarCitas();
+  await listarCitas();
 
   // Submit form
   const btn = document.getElementById('btn-crear');
   if (btn) btn.addEventListener('click', crearCitaDesdeForm);
 });
-
-
