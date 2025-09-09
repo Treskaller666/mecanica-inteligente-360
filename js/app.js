@@ -1,51 +1,5 @@
 /***** app.js — Mecánica Inteligente 360 *****/
 
-/* ==== Diagnóstico visible (muestra mensajes en #estado-app) ==== */
-async function diag(msg, color='stone') {
-  const p = document.getElementById('estado-app');
-  if (!p) return;
-  const cls = { stone:'text-stone-700', red:'text-red-700', green:'text-green-700', blue:'text-blue-700' };
-  p.className = 'text-sm ' + (cls[color]||cls.stone);
-  p.textContent = msg;
-}
-
-/* Prueba de conectividad paso a paso (3 tests) */
-async function diagnostico() {
-  try {
-    if (!window.SUPABASE_URL) { await diag('❌ No hay SUPABASE_URL. Revisa supabaseClient.js', 'red'); return; }
-
-    // Test 1: endpoint público (sin headers)
-   // Test 1: endpoint público (algunos proyectos devuelven 401, lo ignoramos)
- // Test 1: /auth/v1/health
-// Algunos proyectos devuelven 401 aquí, no es un error real.
-// Así que lo ignoramos completamente y seguimos.
-
-
-
-    // Test 2: REST (con headers) — valida anon key y CORS
-    await diag('🔎 Test 2/3: /rest/v1/citas?select=id…', 'blue');
-    const r2 = await fetch(`${window.SUPABASE_URL}/rest/v1/citas?select=id&limit=1`, {
-      headers: {
-        apikey: window.SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${window.SUPABASE_ANON_KEY}`
-      }
-    });
-    const text2 = await r2.text();
-    if (!r2.ok) { await diag(`❌ Test 2/3: ${r2.status} ${text2.slice(0,80)}`, 'red'); return; }
-
-    // Test 3: cliente oficial supabase-js
-    await diag('🔎 Test 3/3: supabase-js select…', 'blue');
-    if (!window._supabase) { await diag('❌ Test 3/3: _supabase no inicializado (orden de scripts)', 'red'); return; }
-    const { data, error } = await window._supabase.from('citas').select('id').limit(1);
-    if (error) { await diag(`❌ Test 3/3: ${error.message}`, 'red'); return; }
-
-    await diag('✅ Conexión OK (3/3).', 'green');
-  } catch (e) {
-    await diag(`❌ Excepción de red: ${e}`, 'red');
-  }
-}
-window.addEventListener('DOMContentLoaded', diagnostico);
-
 /* ==== Espera a que supabaseClient haya creado el cliente ==== */
 let db = null;
 async function waitForSupabase(maxTries = 20, delayMs = 150) {
@@ -78,7 +32,7 @@ async function listarCitas() {
 
   const { data, error } = await withTimeout(
     db.from('citas').select(`
-      id, fecha_hora, servicio, estado,
+      id, fecha_hora, servicio, estado, notas,
       vehiculos (
         marca, modelo,
         clientes ( nombre )
@@ -102,12 +56,14 @@ async function listarCitas() {
     const marca   = c.vehiculos?.marca ?? '—';
     const modelo  = c.vehiculos?.modelo ?? '';
     const cliente = c.vehiculos?.clientes?.nombre ?? 'Cliente';
+    const notas   = c.notas ? `<div class="text-xs text-stone-500 mt-1">Notas: ${c.notas}</div>` : '';
     return `
       <div class="p-4 bg-white rounded-2xl shadow">
-        <p class="font-medium">${fmtHora(c.fecha_hora)} — ${marca} ${modelo}
+        <p class="font-medium">#${c.id} — ${fmtHora(c.fecha_hora)} — ${marca} ${modelo}
           <span class="text-stone-500 text-sm">(${fmtFecha(c.fecha_hora)})</span>
         </p>
         <p class="text-sm text-stone-600">Cliente: ${cliente} • ${c.servicio ?? ''} • Estado: ${c.estado}</p>
+        ${notas}
       </div>
     `;
   }).join('');
@@ -184,6 +140,48 @@ async function crearCitaDesdeForm() {
   }
 }
 
+/* ==== Marcar Recepción (actualiza estado y notas de la cita) ==== */
+async function marcarRecepcion() {
+  const msg = document.getElementById('msg-recepcion');
+  const btn = document.getElementById('btn-recepcion');
+  const citaId = parseInt(document.getElementById('r-cita-id').value, 10);
+  const notas  = document.getElementById('r-notas').value.trim();
+
+  msg.textContent = '';
+  msg.className = 'text-sm text-stone-600';
+
+  if (!citaId) {
+    msg.textContent = 'Debes ingresar un ID de cita válido.';
+    msg.className = 'text-sm text-red-700';
+    return;
+  }
+
+  btn.disabled = true; 
+  btn.textContent = 'Guardando…';
+
+  try {
+    const { error } = await withTimeout(
+      db.from('citas').update({ estado: 'en_recepción', notas }).eq('id', citaId),
+      15000,
+      'marcar recepción'
+    );
+
+    if (error) throw error;
+
+    msg.textContent = '✅ Cita marcada en recepción';
+    msg.className = 'text-sm text-green-700';
+
+    // refresca la lista para ver el nuevo estado
+    await listarCitas();
+  } catch (err) {
+    msg.textContent = '❌ Error: ' + err.message;
+    msg.className = 'text-sm text-red-700';
+  } finally {
+    btn.disabled = false; 
+    btn.textContent = 'Marcar recepción';
+  }
+}
+
 /* ==== Inicio ==== */
 window.addEventListener('DOMContentLoaded', async () => {
   const ok = await waitForSupabase();
@@ -195,9 +193,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     </div>`;
     return;
   }
+
   await listarCitas();
 
-  const btn = document.getElementById('btn-crear');
-  if (btn) btn.addEventListener('click', crearCitaDesdeForm);
-});
+  // Agenda: crear cita
+  const btnCrear = document.getElementById('btn-crear');
+  if (btnCrear) btnCrear.addEventListener('click', crearCitaDesdeForm);
 
+  // Recepción: marcar recepción
+  const btnRecepcion = document.getElementById('btn-recepcion');
+  if (btnRecepcion) btnRecepcion.addEventListener('click', marcarRecepcion);
+});
