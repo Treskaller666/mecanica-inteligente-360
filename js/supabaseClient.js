@@ -1,7 +1,7 @@
 const { createClient } = supabase;
 
 // ⚠️ Reemplaza con los valores de tu proyecto
-const SUPABASE_URL = "https://wtndydzpmawxgsbdolc.supabase.co";
+const SUPABASE_URL = "https://wtnyddzpmawxgusbdolc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...."; // tu anon key completa
 
 // Crear cliente Supabase y exponerlo globalmente
