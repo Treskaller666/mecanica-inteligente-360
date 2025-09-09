@@ -12,15 +12,9 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#fff7db',
-              500: '#f3ba00',
-              700: '#e4002b'
-            }
+            brand: { 50:'#fff7db', 500:'#f3ba00', 700:'#e4002b' }
           },
-          borderRadius: {
-            '2xl': '1rem'
-          }
+          borderRadius: { '2xl': '1rem' }
         }
       }
     }
@@ -29,17 +23,20 @@
   <!-- Alpine.js para interactividad ligera -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- Supabase JS (lo usaremos en el Ítem 2) -->
+  <!-- Supabase JS (la conexión real va en js/supabaseClient.js) -->
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Tus estilos -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-amber-50 text-stone-800">
+  <!-- Estado global de la app -->
   <div x-data="{ view: 'agenda' }" class="min-h-dvh flex flex-col">
 
     <!-- Header -->
     <header class="bg-brand-500 text-white px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
+        <!-- Icono simple -->
         <svg class="w-8 h-8 hidden sm:block" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M3 7h18v2H3V7zm2 4h14l-1.5 6h-11L5 11zm4 7h6v2H9v-2z"/>
         </svg>
@@ -51,19 +48,23 @@
     <!-- Contenido -->
     <main class="flex-1 p-4 space-y-4">
 
-      <!-- Agenda -->
+      <!-- Agendamiento -->
       <section x-show="view === 'agenda'" x-transition class="space-y-3" aria-label="Agendamiento">
         <h2 class="text-xl font-semibold">Agendamiento</h2>
-        <div class="grid gap-3">
-          <div class="p-4 bg-white rounded-2xl shadow">
-            <p class="text-sm text-stone-600">Reserva en 2 pasos con QR Check-in.</p>
-            <button class="mt-3 px-4 py-2 rounded-2xl bg-brand-700 text-white">Nueva reserva</button>
-          </div>
-          <div class="p-4 bg-white rounded-2xl shadow">
-            <p class="font-medium">10:00 — Toyota Yaris (Mantención 10k)</p>
-            <p class="text-sm text-stone-600">Cliente: Ana Pérez</p>
-          </div>
+
+        <!-- Card de acción -->
+        <div class="p-4 bg-white rounded-2xl shadow">
+          <p class="text-sm text-stone-600">Reserva en 2 pasos con QR Check-in.</p>
+          <button
+            class="mt-3 px-4 py-2 rounded-2xl bg-brand-700 text-white"
+            onclick="crearCitaRapida()"
+          >
+            Nueva reserva
+          </button>
         </div>
+
+        <!-- Aquí se renderiza la lista desde js/app.js -->
+        <div id="lista-citas" class="grid gap-3"></div>
       </section>
 
       <!-- Recepción -->
@@ -117,7 +118,7 @@
 
     </main>
 
-    <!-- Navegación inferior (móvil) -->
+    <!-- Navegación inferior (móvil/desktop) -->
     <nav class="sticky bottom-0 bg-white border-t text-sm">
       <ul class="grid grid-cols-3 sm:grid-cols-7">
         <li><button class="w-full py-3" @click="view='agenda'">Agenda</button></li>
@@ -131,6 +132,7 @@
     </nav>
   </div>
 
+  <!-- Tu lógica de UI y la conexión a Supabase -->
   <script src="js/app.js" defer></script>
   <script src="js/supabaseClient.js" defer></script>
 </body>
